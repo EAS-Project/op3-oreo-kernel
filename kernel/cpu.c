@@ -560,7 +560,7 @@ int disable_nonboot_cpus(void)
 	 * with the userspace trying to use the CPU hotplug at the same time
 	 */
 	cpumask_clear(frozen_cpus);
-	sched_set_boost(0);//Wujialong 20160314 disable sched_boost when going to sleep
+	//sched_set_boost(0);//Wujialong 20160314 disable sched_boost when going to sleep
 	pr_info("Disabling non-boot CPUs ...\n");
 	for_each_online_cpu(cpu) {
 		if (cpu == first_cpu)
