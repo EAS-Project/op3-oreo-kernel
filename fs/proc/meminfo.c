@@ -16,8 +16,6 @@
 #include <asm/pgtable.h>
 #include "internal.h"
 
-#include <../drivers/oneplus/coretech/defrag/defrag_helper.h>
-
 void __attribute__((weak)) arch_report_meminfo(struct seq_file *m)
 {
 }
@@ -196,15 +194,6 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
 		   HPAGE_PMD_NR)
 #endif
 		);
-
-	if (alloc_status) {
-		seq_printf(m,
-				"DefragPoolFree: %8lu kB\n"
-				"RealMemFree:    %8lu kB\n",
-				K(global_page_state(NR_FREE_DEFRAG_POOL)),
-				K(i.freeram - global_page_state(NR_FREE_DEFRAG_POOL))
-				);
-	}
 
 	hugetlb_report_meminfo(m);
 

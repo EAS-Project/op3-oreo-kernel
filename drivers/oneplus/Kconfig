@@ -7,4 +7,3 @@ config OEM_TRACE_SUPORT
 	depends on OEM_DEBUG_SUPORT
 	bool "OEM debug function, enable it will register the device, which under /dev/otracer."
 
-source "drivers/oneplus/coretech/Kconfig"
