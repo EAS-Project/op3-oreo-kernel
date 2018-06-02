@@ -571,7 +571,7 @@ static void msm_vfe40_process_error_status(struct vfe_device *vfe_dev)
 		msm_isp_update_last_overflow_ab_ib(vfe_dev);
 }
 
-static void msm_vfe40_read_irq_status_and_clear(struct vfe_device *vfe_dev,
+static void msm_vfe40_read_irq_status(struct vfe_device *vfe_dev,
 	uint32_t *irq_status0, uint32_t *irq_status1)
 {
 	*irq_status0 = msm_camera_io_r(vfe_dev->vfe_base + 0x38);
@@ -607,13 +607,6 @@ static void msm_vfe40_read_irq_status_and_clear(struct vfe_device *vfe_dev,
 		vfe_dev->error_info.violation_status |=
 		msm_camera_io_r(vfe_dev->vfe_base + 0x48);
 
-}
-
-static void msm_vfe40_read_irq_status(struct vfe_device *vfe_dev,
-	uint32_t *irq_status0, uint32_t *irq_status1)
-{
-	*irq_status0 = msm_camera_io_r(vfe_dev->vfe_base + 0x38);
-	*irq_status1 = msm_camera_io_r(vfe_dev->vfe_base + 0x3C);
 }
 
 static void msm_vfe40_process_reg_update(struct vfe_device *vfe_dev,
@@ -866,12 +859,6 @@ static void msm_vfe40_axi_clear_wm_irq_mask(struct vfe_device *vfe_dev,
 	vfe_dev->irq0_mask &= ~(1 << (stream_info->wm[0] + 8));
 	msm_vfe40_config_irq(vfe_dev, (1 << (stream_info->wm[0] + 8)), 0,
 				MSM_ISP_IRQ_DISABLE);
-}
-
-static void msm_vfe40_axi_clear_irq_mask(struct vfe_device *vfe_dev)
-{
-	msm_camera_io_w_mb(0x0, vfe_dev->vfe_base + 0x28);
-	msm_camera_io_w_mb(0x0, vfe_dev->vfe_base + 0x2C);
 }
 
 static void msm_vfe40_cfg_framedrop(void __iomem *vfe_base,
@@ -1801,18 +1788,11 @@ static int msm_vfe40_axi_restart(struct vfe_device *vfe_dev,
 	memset(&vfe_dev->error_info, 0, sizeof(vfe_dev->error_info));
 	atomic_set(&vfe_dev->error_info.overflow_state, NO_OVERFLOW);
 
-	if (enable_camif &&
-		vfe_dev->axi_data.src_info[VFE_PIX_0].input_mux
-		!= EXTERNAL_READ){
+	if (enable_camif) {
 		vfe_dev->hw_info->vfe_ops.core_ops.
 		update_camif_state(vfe_dev, ENABLE_CAMIF);
 	}
-	if (vfe_dev->fetch_engine_info.is_busy == 1) {
-		vfe_dev->fetch_engine_info.is_busy = 0;
-		msm_camera_io_w_mb(0x1, vfe_dev->vfe_base + 0x378);
-		msm_camera_io_w_mb(0x10000, vfe_dev->vfe_base + 0x4C);
-		msm_camera_io_w_mb(0x20000, vfe_dev->vfe_base + 0x4C);
-	}
+
 	return 0;
 }
 
@@ -2185,7 +2165,7 @@ static struct msm_vfe_axi_hardware_info msm_vfe40_axi_hw_info = {
 	.num_comp_mask = 3,
 	.num_rdi = 3,
 	.num_rdi_master = 3,
-	.min_wm_ub = 96,
+	.min_wm_ub = 64,
 	.scratch_buf_range = SZ_32M + SZ_4M,
 };
 
@@ -2210,8 +2190,6 @@ struct msm_vfe_hardware_info vfe40_hw_info = {
 	.vfe_ops = {
 		.irq_ops = {
 			.read_irq_status = msm_vfe40_read_irq_status,
-			.read_irq_status_and_clear =
-				msm_vfe40_read_irq_status_and_clear,
 			.process_camif_irq = msm_vfe40_process_input_irq,
 			.process_reset_irq = msm_vfe40_process_reset_irq,
 			.process_halt_irq = msm_vfe40_process_halt_irq,
@@ -2231,8 +2209,6 @@ struct msm_vfe_hardware_info vfe40_hw_info = {
 			.clear_comp_mask = msm_vfe40_axi_clear_comp_mask,
 			.cfg_wm_irq_mask = msm_vfe40_axi_cfg_wm_irq_mask,
 			.clear_wm_irq_mask = msm_vfe40_axi_clear_wm_irq_mask,
-			.clear_irq_mask =
-				msm_vfe40_axi_clear_irq_mask,
 			.cfg_framedrop = msm_vfe40_cfg_framedrop,
 			.clear_framedrop = msm_vfe40_clear_framedrop,
 			.cfg_wm_reg = msm_vfe40_axi_cfg_wm_reg,

@@ -1780,6 +1780,7 @@ int mhi_dev_suspend(struct mhi_dev *mhi)
 				MHI_DEV_DMA_SYNC);
 
 	}
+	mhi_update_state_info(MHI_STATE_DISCONNECTED);
 
 	atomic_set(&mhi->mhi_dev_wake, 0);
 	pm_relax(mhi->dev);
