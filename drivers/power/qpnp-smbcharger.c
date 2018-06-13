@@ -6812,6 +6812,7 @@ static void smbchg_external_power_changed(struct power_supply *psy)
 	}
 	smbchg_vfloat_adjust_check(chip);
 
+	power_supply_changed(&chip->batt_psy);
 }
 
 static enum power_supply_property smbchg_battery_properties[] = {
