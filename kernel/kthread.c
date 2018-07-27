@@ -156,12 +156,13 @@ void *probe_kthread_data(struct task_struct *task)
 
 static void __kthread_parkme(struct kthread *self)
 {
-	__set_current_state(TASK_PARKED);
-	while (test_bit(KTHREAD_SHOULD_PARK, &self->flags)) {
+	for (;;) {
+		set_current_state(TASK_PARKED);
+		if (!test_bit(KTHREAD_SHOULD_PARK, &self->flags))
+			break;
 		if (!test_and_set_bit(KTHREAD_IS_PARKED, &self->flags))
 			complete(&self->parked);
 		schedule();
-		__set_current_state(TASK_PARKED);
 	}
 	clear_bit(KTHREAD_IS_PARKED, &self->flags);
 	__set_current_state(TASK_RUNNING);
@@ -595,19 +596,6 @@ repeat:
 	goto repeat;
 }
 EXPORT_SYMBOL_GPL(kthread_worker_fn);
-
-/*
- * Returns true when the work could not be queued at the moment.
- * It happens when it is already pending in a worker list
- * or when it is being cancelled.
- */
-static inline bool queuing_blocked(struct kthread_worker *worker,
-				   struct kthread_work *work)
-{
-	lockdep_assert_held(&worker->lock);
-
-	return !list_empty(&work->node) || work->canceling;
-}
 
 /* insert @work before @pos in @worker */
 static void insert_kthread_work(struct kthread_worker *worker,

@@ -1329,7 +1329,7 @@
 
 &soc {
 	qcom,msm-thermal {
-		qcom,poll-ms = <50>;
+		qcom,poll-ms = <250>;
 		qcom,limit-temp = <80>;
 		qcom,core-limit-temp = <90>;
 		msm_thermal_freq: qcom,vdd-apps-rstr {

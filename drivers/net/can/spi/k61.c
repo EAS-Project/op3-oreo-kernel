@@ -917,7 +917,6 @@ static int k61_remove(struct spi_device *spi)
 
 static const struct of_device_id k61_match_table[] = {
 	{ .compatible = "fsl,k61" },
-	{ .compatible = "nxp,mpc5746c" },
 	{ }
 };
 
